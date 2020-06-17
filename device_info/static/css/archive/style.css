@@ -1,0 +1,92 @@
+.main_block {
+    display: flex;
+}
+
+.color_th {
+    background: #dedce0;
+    text-align: center;
+}
+
+#size_tr {
+    width: 214px;
+}
+
+#kf_tr {
+    width: 225px;
+    padding: 0 5px 0 5px !important;
+}
+
+.place_td {
+    text-align: center;
+}
+
+.date_choose {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.date_size {
+    width: 150px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+input::-webkit-clear-button {
+    display: none;
+}
+
+.select_year {
+    width: 80px;
+}
+
+.bett_space {
+    display: flex;
+    justify-content: space-between;
+}
+
+.center_space {
+    display: flex;
+    justify-content: center;
+}
+
+.menu_button {
+    width: 55px;
+    height: 30px;
+    margin-right: 50px;
+}
+
+.return_button {
+    width: 55px;
+    height: 30px
+}
+
+.exit_button {
+    width: 55px;
+    height: 30px;
+}
+
+.archive_day_one {
+    font-size: 34px;
+    font-family: arial, helvetica, sans-serif;
+    color: green;
+    font-weight: bold;
+}
+
+#p_title_day {
+    margin-top: 20px;
+}
+
+#value_day {
+}
+
+#archive_month {
+    width: 250px
+}
+#rashod_month {
+    width: 234px;
+}

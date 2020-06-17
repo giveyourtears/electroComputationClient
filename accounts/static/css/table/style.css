@@ -1,0 +1,113 @@
+.loss_elem {
+    background-color: white;
+    border: 1px solid grey;
+    text-align: center;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#block-main {
+    overflow: scroll;
+}
+
+.hovermenu {
+    position: fixed;
+    right: -300px;
+    top: 100px;
+    width: 300px;
+    transition: right .5s ease-out
+}
+.first {
+    width: 135px;
+    text-align: center;
+    background: PaleTurquoise;
+}
+
+.second {
+    background: DarkSeaGreen;
+    text-align: center;
+}
+
+.third {
+    background: LightPink;
+    text-align: center;
+}
+
+#procent_kvtch {
+    width: 65px;
+    text-align: center;
+}
+
+.block {
+    height: 100px;
+    width: 100px;
+    border: 1px solid black;
+    margin: 0px;
+    float: right;
+}
+
+.table-scroll tbody {
+    overflow-y: scroll;
+}
+
+.table-scroll tr {
+    width: 100%;
+    table-layout: fixed;
+}
+/* Стили прелоадера */
+
+#preloader {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(212, 211, 211, 1);
+    z-index: 30;
+}
+
+.preload small {
+    font-size: 25px;
+}
+
+.preload {
+    width: 250px;
+    height: 100px;
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    margin-left: -125px;
+    margin-top: -75px;
+    color: #fff;
+    font-size: 40px;
+    letter-spacing: -2px;
+    text-align: center;
+    line-height: 35px;
+}
+
+#preloader .svg_anm {
+    position: absolute;
+    width: 41px;
+    height: 41px;
+    background: url(pufff.svg) center center no-repeat;
+    background-size: 41px;
+    margin: -16px 0 0 -16px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.table td, .table th {
+    padding: 0 !important;
+}
+
+.big_row {
+    text-align: center;
+}
+
+.my_column {
+    text-align: center;
+}

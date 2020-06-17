@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Информации о устройстве</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/device_info/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<script type="text/javascript">
+    let searchParams = new URLSearchParams(window.location.search);
+    window.onload = function () {
+        let $preloader = $('#preloader'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+    };
+
+    getUrlVars = () => {
+        let url_params = {};
+        let parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            url_params[key] = value;
+        });
+        return url_params;
+    }
+
+    let result_string = getUrlVars()["name"];
+    archive_day = () => {
+        window.location = '/device/archive_day?driver_name=' + result_string;
+    };
+    archive_month = () => {
+        window.location = '/device/archive_month?driver_name=' + result_string;
+    };
+    rashod_day = () => {
+        window.location = '/device/rashod_day?driver_name=' + result_string;
+    };
+    rashod_month = () => {
+        window.location = '/device/rashod_month?driver_name=' + result_string;
+    }
+</script>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: #dedede">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="justify-content: space-between">
+            <a class="navbar-brand" href="">Информация о выбранном приборе учета электроэнергии</a> {% if user.is_authenticated %}
+            <div>
+                <strong style="margin-right: 15px">Пользователь: {{ user.get_username }}</strong>
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+                {% else %}
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="navbar" style="padding: 0; background: #f8f9fa">
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/menu" style="text-decoration: none; border: none">На главную</a></li>
+            {% for key,value in dict.items %}
+            <li role="menuitem">
+                {% for key_fes, value_fes in dict_two.items %} {% if key_fes == key %}
+                <a style="border: none; text-decoration: none; pointer-events: none;" href="/balance?balans={{ key }}">{{value_fes}}</a> {% endif %} {% endfor %}
+                <div class="mega-menu" aria-hidden="true" role="menu">
+                    {% for key2,value2 in value.items %}
+                    <div class="nav-column">
+                        <h6><a style="color: black; font-size: 13px" href="/res?res={{ key }}/{{ key2 }}">{{ key2 }}</a></h6> {% for key3, value3 in value2.items %}
+                        <ul>
+                            <li role="menuitem">
+                                {% for key_ps, value_ps in dict_three.items %} {% if key_ps == key3 %}
+                                <a style="color: black; font-size: 12px; padding-left: 12px; padding-top: 0" href="/balance?balans={{ key }}/{{ key2 }}/{{ key3 }}">{{ value_ps }}</a> {% endif %} {% endfor %}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/accounting" style="border: none; text-decoration: none">Учеты электроэнергии</a></li>
+            <li role="menuitem"><a href="/light" style="border: none; text-decoration: none">Уличное освещение</a></li>
+        </ul>
+    </div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/menu" style="color: black">Главная страница</a></li>
+          <li class="breadcrumb-item"><a href="/accounting" style="color: black">Поиск</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Информация по ТУ</li>
+      </ol>
+    </nav>
+<div class="page-body">
+    <div class="jumbotron mt-2">
+      <h1 class="display-4">Подстанция: {{ ps }}</h1>
+      <p class="lead">Присоединение: {{ vl }}</p>
+      <p>Объект: {{ tp }}</p>
+        <p>Наименование точки учета: {{ tu }}</p>
+    </div>
+    <div class="col-3 mb-3">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th class="col_device">Наименование, модель счетчика</th>
+                    <th class="col_device">Коэффициент трансформации по току,  Ki</th>
+                    <th class="col_device">Зав.№ счетчика</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for dada in description_array %}
+                        <td class="row_device">{{ dada }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <div class="col-3 mb-3">
+            <h6>Показания по выбранной точке учета:</h6>
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th class="col_device">Показание на начало суток</th>
+                    <th class="col_device">Показания на начало месяца</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="row_device">{{ day_start }}</td>
+                    <td class="row_device">{{ day_start_month }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-3 mb-3">
+            <h6>Показания архивные</h6>
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th class="col_device">Показание на начало суток</th>
+                    <th class="col_device">Показания на начало месяца</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="row_device"><button onclick="archive_day()">Посмотреть</button></td>
+                    <td class="row_device"><button onclick="archive_month()">Посмотреть</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-3 mb-3">
+            <h6>Отчеты</h6>
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th class="col_device">Расход - посуточно за месяц</th>
+                    <th class="col_device">Расход - помесячно за год</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="row_device"><button onclick="rashod_day()">Посмотреть</button></td>
+                    <td class="row_device"><button onclick="rashod_month()">Посмотреть</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

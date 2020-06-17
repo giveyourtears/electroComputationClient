@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Информация по подстанции</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu/base.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/table/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<script type="text/javascript">
+    let searchParams = new URLSearchParams(window.location.search);
+    window.onload = function() {
+        let $preloader = $('#preloader'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+        let options = $(".sel_bal option");
+        let options1 = $(".sel1 option");
+        sort_select("sel_bal", options);
+        sort_select("sel1", options1);
+        initial_dates();
+        check_params();
+
+        $(".sel_bal").change(function() {
+            let selectedCountry = $(this).children("option:selected").val();
+            searchParams.delete('vl');
+            searchParams.set('vl', selectedCountry);
+            window.location.search = searchParams;
+        });
+        $(".date_start").change(function() {
+            let diff_start = calc_time();
+            document.getElementById("diffHours").innerHTML = diff_start;
+            let changed_start_date = document.getElementById("start").value;
+            let time_value = document.getElementById("diffHours").innerText;
+            searchParams.delete('start');
+            searchParams.set('start', changed_start_date);
+            searchParams.delete('time_diff');
+            searchParams.set('time_diff', time_value);
+            window.location.search = searchParams;
+        });
+        $(".date_end").change(function() {
+            let diff_end = calc_time();
+            document.getElementById("diffHours").innerHTML = diff_end;
+            let changed_end_date = document.getElementById("end").value;
+            let time_value = document.getElementById("diffHours").innerText;
+            searchParams.delete('end');
+            searchParams.set('end', changed_end_date);
+            searchParams.delete('time_diff');
+            searchParams.set('time_diff', time_value);
+            window.location.search = searchParams;
+        });
+        calc_data();
+        summ_losses_kvtch();
+        calc_balance();
+    };
+
+    function sort_select(name, options) {
+        options.detach().sort(function(a, b) {
+            let at = $(a).text();
+            let bt = $(b).text();
+            return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+        });
+        options.appendTo("." + name + "");
+    }
+
+    function calc_balance() {
+        let first = document.getElementById("balans_kvcht").innerText;
+        let second = parseFloat(document.getElementById("consumption_reg").innerText);
+        if (second === null || second === 0 || second === undefined) {
+            document.getElementById("balans_percent").innerHTML = 0;
+        } else {
+            let result_balance = (first / second) * 100;
+            document.getElementById("balans_percent").innerHTML = result_balance.toFixed(3);
+        }
+    }
+
+    function calc_time() {
+        let start = document.getElementById("start").value.split('-');
+        let end = document.getElementById("end").value.split('-');
+        let start_hours = new Date(start);
+        let end_hours = new Date(end);
+        let timeDiff = Math.abs(end_hours.getTime() - start_hours.getTime());
+        let diff_hours = Math.ceil(timeDiff / (1000 * 3600));
+        return diff_hours;
+    }
+
+    function calc_data() {
+        let tds = document.getElementById('loss_calc_elem').getElementsByTagName('td');
+        for (let i = 0; i < tds.length; i++) {
+            if (tds[i].id == 'loss_elem') {
+                let data = tds[i].innerHTML;
+            }
+        }
+        let sum_loss = 0;
+        let period_data = 0;
+        for (let i = 0; i < tds.length; i++) {
+            if (tds[i].id == 'loss_elem') {
+                let data = tds[i].innerHTML;
+                data = data.replace(',', '.');
+                sum_loss += parseFloat(data);
+            }
+            if (tds[i].id == 'period_data') {
+                let data = tds[i].innerHTML;
+                data = data.replace(',', '.');
+                period_data += parseFloat(data);
+            }
+        }
+        document.getElementById('losss_calc_elem').innerHTML += sum_loss.toFixed(3);
+        document.getElementById('periodd_data').innerHTML += period_data.toFixed(3);
+    }
+
+    function summ_losses_kvtch() {
+        let tds = document.getElementById('periodd_data').innerText;
+        let less_calc_elem = document.getElementById('losss_calc_elem').innerText;
+        let consumption_reg = parseFloat(document.getElementById('consumption_reg').innerText);
+        if (consumption_reg === null || consumption_reg === 0) {
+            document.getElementById('consumption_reg').style.backgroundColor = 'red';
+            document.getElementById('input_').style.backgroundColor = 'red';
+            document.getElementById('kvtch').innerHTML = 0;
+            document.getElementById('kvtch').style.backgroundColor = 'red';
+            document.getElementById('percent_kvtch').innerHTML = 0;
+            document.getElementById('percent_kvtch').style.backgroundColor = 'red';
+            document.getElementById('less_sec_elem').innerHTML = 0;
+            document.getElementById('less_sec_elem').style.backgroundColor = 'red';
+            document.getElementById('consumpation_xx').innerHTML = 0;
+            document.getElementById('consumpation_xx').style.backgroundColor = 'red';
+            document.getElementById('result_percent').innerHTML = 0;
+            document.getElementById('result_percent').style.backgroundColor = 'red';
+            document.getElementById('balans_kvcht').innerHTML = 0;
+            document.getElementById('balans_kvcht').style.backgroundColor = 'red';
+            document.getElementById('balans_percent').innerHTML = 0;
+            document.getElementById('balans_percent').style.backgroundColor = 'red';
+        } else {
+            let consumption_xx_kvtch = (less_calc_elem / consumption_reg) * 100;
+            let result_kvtch = consumption_reg - tds;
+            let result_percent_kvtch = (result_kvtch / consumption_reg) * 100;
+            document.getElementById('kvtch').innerHTML += result_kvtch.toFixed(3);
+            document.getElementById('percent_kvtch').innerHTML += result_percent_kvtch.toFixed(3);
+            document.getElementById('less_sec_elem').innerHTML = less_calc_elem;
+            document.getElementById('consumpation_xx').innerHTML = consumption_xx_kvtch.toFixed(3);
+
+            let percent_result = document.getElementById('procent_kvtch').value;
+            let balans_ktvch = result_kvtch - percent_result;
+            let result = (parseFloat(percent_result) / parseFloat(consumption_reg)) * 100;
+
+            document.getElementById('result_percent').innerHTML = result.toFixed(3);
+            document.getElementById('balans_kvcht').innerHTML = balans_ktvch.toFixed(3);
+            let balans_percent = (balans_ktvch / result_kvtch) * 100;
+            console.log(balans_percent);
+            document.getElementById('balans_percent').innerHTML = balans_percent.toFixed(3);
+        }
+    }
+
+    function get_value() {
+        let procent_kv = document.getElementById('procent_kvtch').value;
+        if (procent_kv === "" || procent_kv === null || procent_kv === undefined) {
+            let procent_result = document.getElementById("procent_kvtch");
+            procent_kv = 0;
+            procent_result.value = 0;
+        }
+        let consumption_reg = document.getElementById('consumption_reg').innerText;
+        consumption_reg = consumption_reg.replace(',', '.');
+        let result = (parseFloat(procent_kv) / parseFloat(consumption_reg)) * 100;
+        document.getElementById('result_percent').innerHTML = result.toFixed(3);
+        let result_ktvch = document.getElementById('kvtch').innerHTML;
+        let balans_ktvch = parseFloat(result_ktvch) - parseFloat(procent_kv);
+        document.getElementById('balans_kvcht').innerHTML = balans_ktvch.toFixed(3);
+        let balans_percent = (balans_ktvch / parseFloat(consumption_reg)) * 100;
+        console.log(balans_percent);
+        document.getElementById('balans_percent').innerHTML = balans_percent.toFixed(3);
+    }
+
+    function initial_dates() {
+        let date_start = searchParams.get('start');
+        let date_end = searchParams.get('end');
+        let min_date_start = date_start;
+        let date = new Date();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        let day_start = date.getDate() - 1;
+        let hidden_start_date = document.getElementById('hidden_date').innerText;
+
+        nowDate = date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+        nowDate_end = date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+        nowDate_start = date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day_start < 10 ? '0' : '') + day_start;
+        date_end_fail = date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+        if (min_date_start) {
+            min_date_start = min_date_start.split('-');
+
+            min_date_start = new Date(min_date_start[0], +min_date_start[1] - 1, +min_date_start[2] + 1, 0, 0, 0, 0);
+            let month = min_date_start.getMonth() + 1;
+            let day = min_date_start.getDate();
+            min_date_start = min_date_start.getFullYear() + '-' + (month + 1 < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+            console.log(min_date_start);
+        }
+
+        if (date_start === '' && date_end === '') {
+            let new_start_date = new Date(nowDate);
+            new_start_date.setDate(new_start_date.getDate() - 1);
+            let start_day = new Date(new_start_date).toISOString().substr(0, 10);
+
+            $('#start').val(start_day);
+            $('#end').val(nowDate); {
+
+                $(".date_end").attr("max", nowDate);
+            } {
+                $(".date_start").attr("max", start_day);
+            }
+        } else {
+
+            if (date_start > date_end) {
+                $('#start').val(date_start);
+                $('#end').val(min_date_start); {
+                    $(".date_end").attr("min", min_date_start);
+                    $(".date_end").attr("max", nowDate_end)
+                } {
+                    $(".date_start").attr("max", nowDate_start);
+                    $(".date_start").attr("min", hidden_start_date);
+                }
+            } else {
+                $('#start').val(date_start);
+                $('#end').val(date_end); {
+                    $(".date_end").attr("min", min_date_start);
+                    $(".date_end").attr("max", nowDate_end);
+                } {
+                    $(".date_start").attr("max", nowDate_start);
+                    $(".date_start").attr("min", hidden_start_date);
+                }
+            }
+        }
+
+        let start = document.getElementById("start").value.split('-');
+        let end = document.getElementById("end").value.split('-');
+        let start_hours = new Date(start);
+        let end_hours = new Date(end);
+        let timeDiff = Math.abs(end_hours.getTime() - start_hours.getTime());
+        if (isNaN(timeDiff)) {
+            let diff_hours = 24;
+            document.getElementById("diffHours").innerHTML = diff_hours;
+        } else {
+            let diff_hours = Math.ceil(timeDiff / (1000 * 3600));
+            document.getElementById("diffHours").innerHTML = diff_hours;
+        }
+    }
+
+    function check_params() {
+        let sel = searchParams.get('vl');
+        let date_start = searchParams.get('start');
+        let date_end = searchParams.get('end');
+        let time_diff = searchParams.get('time_diff');
+        let array_elements = document.getElementsByClassName('sel_bal')[0];
+        for (let i = 0; i < array_elements.length; i++) {
+            if (array_elements[i]['text'] == sel) {
+                array_elements[i].selected = true;
+            }
+        }
+        if (sel === null || sel === '') {
+            let vl_value = document.getElementsByClassName('sel_bal')[0].options[0].value;
+            searchParams.set('vl', vl_value)
+        }
+        if (date_start === null || date_start === '') {
+            let start_value = document.getElementById("start").value;
+            searchParams.set('start', start_value)
+        }
+        if (date_end === null || date_end === '') {
+            let end_value = document.getElementById("end").value;
+            searchParams.set('end', end_value)
+        }
+        if (time_diff === null || time_diff === '') {
+            let time_value = document.getElementById("diffHours").innerText;
+            searchParams.set('time_diff', time_value)
+        }
+
+        if (sel != null && sel !== "" && date_end != null && date_end !== "" && date_start !== "" && date_start != null && time_diff != null && time_diff !== "") {
+            return;
+        }
+        window.location.search = searchParams;
+    }
+</script>
+
+<body>
+{#    <div id="preloader">#}
+{#        <div class="preload"><span class="svg_anm"></span>#}
+{#            <br>Подождите#}
+{#            <br><small>идет загрузка</small></div>#}
+{#    </div>#}
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: #dedede">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="justify-content: space-between">
+            <a class="navbar-brand" href="">Информация по подстанции</a> {% if user.is_authenticated %}
+            <div>
+                <strong style="margin-right: 15px">Пользователь: {{ user.get_username }}</strong>
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+                {% else %}
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="navbar" style="padding: 0; background: #f8f9fa">
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/menu" style="text-decoration: none; border: none">На главную</a></li>
+            {% for key,value in dict.items %}
+            <li role="menuitem">
+                {% for key_fes, value_fes in dict_two.items %} {% if key_fes == key %}
+                <a style="border: none; text-decoration: none; pointer-events: none;" href="/balance?balans={{ key }}">{{value_fes}}</a> {% endif %} {% endfor %}
+                <div class="mega-menu" aria-hidden="true" role="menu">
+                    {% for key2,value2 in value.items %}
+                    <div class="nav-column">
+                        <h6><a style="color: black; font-size: 13px" href="/res?res={{ key }}/{{ key2 }}">{{ key2 }}</a></h6> {% for key3, value3 in value2.items %}
+                        <ul>
+                            <li role="menuitem">
+                                {% for key_ps, value_ps in dict_three.items %} {% if key_ps == key3 %}
+                                <a style="color: black; font-size: 12px; padding-left: 12px; padding-top: 0" href="/balance?balans={{ key }}/{{ key2 }}/{{ key3 }}">{{ value_ps }}</a> {% endif %} {% endfor %}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/accounting" style="border: none; text-decoration: none">Учеты электроэнергии</a></li>
+            <li role="menuitem"><a href="/light" style="border: none; text-decoration: none">Уличное освещение</a></li>
+        </ul>
+    </div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/menu" style="color: black">Главная страница</a></li>
+        <li class="breadcrumb-item"><a href="/res/?res={{ res_name }}" style="color: black">{{ res }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ ps_name }}</li>
+      </ol>
+    </nav>
+    <div style="display: flex" class="mb-3 mt-3">
+        <h6 id="hidden_date" hidden>{{ hidden_date }}</h6>
+        <div class="3">
+            <table class="table table-bordered table-striped" style="text-align: center" border="2">
+            <tbody>
+                <tr >
+                    <td>Начало периода</td>
+                    <td>
+                        <input id="start" required class="date_start" type="date" value="">
+                    </td>
+                    <td>Конец периода</td>
+                    <td>
+                        <input id="end" required class="date_end" type="date" value="">
+                    </td>
+                    <td>Подстанция</td>
+                    <td>Присоединение</td>
+                </tr>
+                <tr>
+                    {% for key,value in menu_table.items %}
+                    <td>Количество часов (в периоде)</td>
+                    <td id="diffHours"></td>
+                    <td colspan="2"></td>
+                    <td>
+                        <select class="sel1">
+                            {% for key_fes, value_fes in ps.items %}
+                            <option value="{{ key_fes }}">{{ value_fes }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <select style="width: 118px" class="sel_bal">
+                            {% for result in value %}
+                            <option value="{{ result }}">{{ result }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="col-6">
+            <table class="table table-bordered table-striped" style="text-align: center">
+                <thead>
+                    <tr>
+                        <th>Расход по присоединению (ВЛ-10кВ)
+                            <th colspan="2">Суммарные потери
+                                <th colspan="2">В том числе потери ХХ
+                                    <th colspan="2">Потери технические (расчёт)
+                                        <th colspan="2">Баланс</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>кВт*ч</th>
+                        <th>кВт*ч</th>
+                        <th>%</th>
+                        <th>кВт*ч</th>
+                        <th>%</th>
+                        <th>кВт*ч</th>
+                        <th>%</th>
+                        <th>кВт*ч</th>
+                        <th>%</th>
+                    </tr>
+                    <tr>
+                        <th id="consumption_reg">{{ reg_consumption }}</th>
+                        <th id="kvtch"></th>
+                        <th id="percent_kvtch"></th>
+                        <th id="less_sec_elem"></th>
+                        <th id="consumpation_xx"></th>
+                        <th id="input_">
+                            <input type="number" required value="0" step="1" min="0" onchange="get_value()" id="procent_kvtch" oninput="validity.valid||(value='');">
+                        </th>
+                        <th id="result_percent"></th>
+                        <th id="balans_kvcht"></th>
+                        <th id="balans_percent"></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table table-bordered table-striped">
+        <table class="table table-bordered" id="table_balance">
+            <thead style="text-align: center">
+                <tr>
+                    <th colspan="9"></th>
+                    <th colspan="2">Показания, кВт*ч</th>
+                    <th colspan="1"></th>
+                </tr>
+                <tr>
+                    <th>№ п/п</th>
+                    <th>Диспетчерский номер ТП</th>
+                    <th>Наименование точки учета</th>
+                    <th>Населенный пункт</th>
+                    <th>S тр-ра, кВА</th>
+                    <th>Pхх, кВт</th>
+                    <th>Потери ХХ за период, кВт*ч</th>
+                    <th>Ктт</th>
+                    <th>Зав.№ счетчика</th>
+                    <th>на начало периода</th>
+                    <th>на конец периода</th>
+                    <th>Расход за период, кВт*ч</th>
+                </tr>
+            </thead>
+            <tbody id="loss_calc_elem">
+                {% load mathfilters %} {% for item in table_elements %}
+                <tr class="big_row">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.dtp }}</td>
+                    <td>{{ item.name_of_accounting_point }}</td>
+                    <td>{{ item.locality }}</td>
+                    <td>{{ item.str_ra }}</td>
+                    <td>{{ item.pxx }}</td>
+                    <td id="loss_elem">{{ item.pxx|mul:time_dif|floatformat:3}}</td>
+                    <td>{{ item.ktt }}</td>
+                    <td>{{ item.head_of_counter }}</td>
+                    <td id="start_period">{{ item.start_period|floatformat:3}}</td>
+                    <td id="end_period">{{ item.end_period|floatformat:3}}</td>
+                    {% if item.q_slim == 0 %}
+                    <td style="background: red" id="period_data">
+                        {{ item.end_period|sub:item.start_period|mul:item.ktt|floatformat:3}}</td>
+                    {% else %}
+                    <td id="period_data">
+                        {{ item.end_period|sub:item.start_period|mul:item.ktt|floatformat:3}}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="my_column">Итого:</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="my_column">Итого:</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="my_row" style="text-align: center" id="losss_calc_elem"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="my_row" style="text-align: center" id="periodd_data"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+    </div>
+</body>
+
+</html>

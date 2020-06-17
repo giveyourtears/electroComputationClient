@@ -1,0 +1,42 @@
+.button_energy {
+    display: flex;
+    justify-content: center;
+}
+
+.select_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button_menu {
+    width: 55px;
+    height: 30px;
+}
+
+.askue {
+    font-size: 34px;
+    font-family: arial, helvetica, sans-serif;
+    color: green;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 28px;
+    font-family: arial, helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.title_place {
+    display: flex;
+    justify-content: center;
+}
+
+.button_place {
+    display: flex;
+    justify-content: space-between;
+}
+
+.title_accounting {
+    margin-top: 20px;
+}

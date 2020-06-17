@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>РЭС</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/table/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/labs.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/masonry.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <script type="text/javascript" src="{% static 'js/check_version.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<script type="text/javascript">
+    let searchParams = new URLSearchParams(window.location.search);
+    window.onload = function () {
+        var $preloader = $('#preloader'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+        doTheThing()
+    };
+
+    function check_params() {
+        let sel = searchParams.get('vl');
+        if (sel === null || sel === '') {
+            let vl_value = document.getElementsByClassName('sel_bal')[0].options[0].value;
+            searchParams.set('vl', vl_value)
+        }
+        if (sel != null && sel !== "") {
+            return;
+        }
+        window.location.search = searchParams;
+    }
+        let result_data;
+    function send_data(points) {
+         $.ajax({
+            type: 'POST',
+            url: '/res/td_data/',
+            data: {
+                'points': points
+            },
+            success: (response) => {
+                let data = JSON.parse(response);
+                result_data = data;
+            },
+            error: (err) => {
+                return err;
+            },
+            async: false
+        })
+    };
+
+    function doTheThing() {
+        let points = [];
+        var all_tables = $(".values_table");
+        console.log(all_tables)
+        for (let a = 0; a < all_tables.length; a++) {
+            let tr_universal = all_tables[a].children[1].children;
+            for (let i = 0; i < tr_universal.length; i++) {
+                points.push(tr_universal[i].id);
+            }
+            let result_table_tr = send_data(points);
+            for (let i = 0; i < tr_universal.length; i++) {
+                for (let j = 1; j < tr_universal[i].children.length; j++) {
+                    $.each(result_data, (index, item) => {
+                        if (index === tr_universal[i].id) {
+                            tr_universal[i].children[j].innerHTML = item[j-1].toFixed(1)
+                        }
+                    })
+                }
+            }
+            points = [];
+        };
+    }
+    let browser_version = get_browser()
+    browser_version.name == "Chrome" && browser_version.version < 55 ? doTheThing() : f();
+</script>
+
+<body>
+{#    <div id="preloader">#}
+{#        <div class="preload"><span class="svg_anm"></span>#}
+{#            <br>Подождите#}
+{#            <br><small>идет загрузка</small></div>#}
+{#    </div>#}
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: #dedede">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="justify-content: space-between">
+            <a class="navbar-brand" href="">{{ name }}</a> {% if user.is_authenticated %}
+            <div>
+                <strong style="margin-right: 15px">Пользователь: {{ user.get_username }}</strong>
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+                {% else %}
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="navbar" style="padding: 0; background: #f8f9fa">
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/menu" style="text-decoration: none; border: none">На главную</a></li>
+            {% for key,value in dict.items %}
+            <li role="menuitem">
+                {% for key_fes, value_fes in dict_two.items %} {% if key_fes == key %}
+                <a style="border: none; text-decoration: none; pointer-events: none;" href="/balance?balans={{ key }}">{{value_fes}}</a> {% endif %} {% endfor %}
+                <div class="mega-menu" aria-hidden="true" role="menu">
+                    {% for key2,value2 in value.items %}
+                    <div class="nav-column">
+                        <h6><a style="color: black; font-size: 13px" href="/res?res={{ key }}/{{ key2 }}">{{ key2 }}</a></h6> {% for key3, value3 in value2.items %}
+                        <ul>
+                            <li role="menuitem">
+                                {% for key_ps, value_ps in dict_three.items %} {% if key_ps == key3 %}
+                                <a style="color: black; font-size: 12px; padding-left: 12px; padding-top: 0" href="/balance?balans={{ key }}/{{ key2 }}/{{ key3 }}">{{ value_ps }}</a> {% endif %} {% endfor %}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/accounting" style="border: none; text-decoration: none">Учеты электроэнергии</a></li>
+            <li role="menuitem"><a href="/light" style="border: none; text-decoration: none">Уличное освещение</a></li>
+        </ul>
+    </div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/menu" style="color: black">Главная страница</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Информация: {{ name }}</li>
+      </ol>
+    </nav>
+    <div class="page-body mt-3">
+        <div class="wrapper grid-block">
+            <div class="wrapper">
+                <div class="masonry">
+                    {% for ves,value in table_elems.items %}
+                        {% for res,value2 in value.items %}
+                            {% for ps2,value3 in value2.items %}
+                                <div class="brick">
+                                        {% for key_fes, value_fes in ps.items %}
+                                            {% if key_fes == ps2 %}
+                                               <h6>{{ value_fes }}</h6>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <table class="table table-bordered table-striped values_table" id="table_res" style="text-align: center">
+                                            <thead>
+                                            <tr>
+                                                <th rowspan="2">Наименование присоединения</th>
+                                                <th colspan="2">Расход, кВт*ч</th>
+                                                <th colspan="2">Баланс по ТП, %</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Прошедший месяц</th>
+                                                <th>Прошедшие сутки</th>
+                                                <th>Прошедший месяц</th>
+                                                <th>Прошедшие сутки</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="test_table">
+                                            {% for vl in value3 %}
+                                                <tr id="{{ ves }}/{{ res }}/{{ ps2 }}/{{ vl }}">
+                                                    <td id="vl">{{ vl }}</td>
+                                                    <td class="colum_res" id="rash_month">-</td>
+                                                    <td class="colum_res" id="rash_day">-</td>
+                                                    <td class="colum_res" id="balance_month">-</td>
+                                                    <td class="colum_res" id="balance_day">-</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    async function f() {
+        let points = [];
+        let all_tables = $(".values_table");
+        send_data = async (points) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'POST',
+                    url: '/res/td_data/',
+                    data: {
+                        'points': points
+                    },
+                    success: (response) => {
+                        return resolve($.parseJSON(response));
+                    },
+                    error: (err) => {
+                        reject(err);
+                    }
+                })
+            });
+        };
+        for (let a = 0; a < all_tables.length; a++) {
+            let tr_universal = all_tables[a].children[1].children;
+            for (let i = 0; i < tr_universal.length; i++) {
+                points.push(tr_universal[i].id);
+            }
+            let result_table_tr = await send_data(points);
+            for (let i = 0; i < tr_universal.length; i++) {
+                for (let j = 1; j < tr_universal[i].children.length; j++) {
+                    $.each(result_table_tr, (index, item) => {
+                        if (index === tr_universal[i].id) {
+                            tr_universal[i].children[j].innerHTML = item[j-1].toFixed(1)
+                        }
+                    })
+                }
+            }
+            points = [];
+        };
+    }
+</script>
+</body>
+
+</html>

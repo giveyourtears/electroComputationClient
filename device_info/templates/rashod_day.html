@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Расход - День</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/table/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/archive/style.css' %}">
+     <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/graphic/style.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<script type="text/javascript">
+    let searchParams = new URLSearchParams(window.location.search);
+    formatDate = (date) => {
+        let d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    };
+    initial_dates = () => {
+        let first_date = searchParams.get('date_one');
+        let last_date = searchParams.get('date_second');
+        if (first_date === '' || first_date === null || last_date === null || last_date === '') {
+           const monthControl = document.getElementById('bdaymonth');
+           const date= new Date();
+           const month=("0" + (date.getMonth() + 1)).slice(-2);
+           const year=date.getFullYear();
+           monthControl.value = `${year}-${month}`;
+           let last_day = formatDate(new Date(year, month, 0));
+           let firstDay = formatDate(new Date(year, month - 1));
+           if (first_date === null || first_date === '') {
+               searchParams.set('date_one', firstDay);
+           }
+           if (last_date === null || last_date ==='') {
+               searchParams.set('date_second', last_day);
+           }
+           if (first_date !== null && first_date !== "" && last_date !== null && last_date !== '') {
+                return;
+           }
+           window.location.search = searchParams;
+       } else {
+           const monthControl = document.getElementById('bdaymonth');
+           let split_result = first_date.split('-');
+           monthControl.value = `${split_result[0]}-${split_result[1]}`;
+           let last_day = formatDate(new Date(split_result[0], split_result[1], 0));
+           let firstDay = formatDate(new Date(split_result[0], split_result[1] - 1));
+           if (first_date === null || first_date === '') {
+               searchParams.set('date_one', firstDay);
+           }
+           if (last_date === null || last_date ==='') {
+               searchParams.set('date_second', last_day);
+           }
+           if (first_date !== null && first_date !== "" && last_date !== null && last_date !== '') {
+                return;
+           }
+           window.location.search = searchParams;
+       }
+    };
+
+    set_max_value = () => {
+        const date= new Date();
+        const month=("0" + (date.getMonth() + 1)).slice(-2);
+        const year=date.getFullYear();
+        document.getElementById("bdaymonth").max = `${year}-${month}`;
+    };
+
+    window.onload = function () {
+        let $preloader = $('#preloader'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+        set_max_value();
+        initial_dates();
+        $(".date_size").change(function () {
+            let changed_start_date = document.getElementById("bdaymonth").value;
+            let splitted_string = changed_start_date.split('-');
+            searchParams.delete('date_one');
+            searchParams.delete('date_second');
+            let last_day = formatDate(new Date(splitted_string[0], splitted_string[1], 0));
+            let firstDay = formatDate(new Date(splitted_string[0], splitted_string[1] - 1));
+            searchParams.set('date_one', firstDay);
+            searchParams.set('date_second', last_day);
+            const monthControl = document.getElementById('bdaymonth');
+            monthControl.value = `${splitted_string[0]}-${splitted_string[1]}`;
+            window.location.search = searchParams;
+        });
+    };
+</script>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light" style="background: #dedede">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="justify-content: space-between">
+            <a class="navbar-brand" href="">Расход по суткам</a> {% if user.is_authenticated %}
+            <div>
+                <strong style="margin-right: 15px">Пользователь: {{ user.get_username }}</strong>
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+                {% else %}
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="navbar" style="padding: 0; background: #f8f9fa">
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/menu" style="text-decoration: none; border: none">На главную</a></li>
+            {% for key,value in dict.items %}
+            <li role="menuitem">
+                {% for key_fes, value_fes in dict_two.items %} {% if key_fes == key %}
+                <a style="border: none; text-decoration: none; pointer-events: none;" href="/balance?balans={{ key }}">{{value_fes}}</a> {% endif %} {% endfor %}
+                <div class="mega-menu" aria-hidden="true" role="menu">
+                    {% for key2,value2 in value.items %}
+                    <div class="nav-column">
+                        <h6><a style="color: black; font-size: 13px" href="/res?res={{ key }}/{{ key2 }}">{{ key2 }}</a></h6> {% for key3, value3 in value2.items %}
+                        <ul>
+                            <li role="menuitem">
+                                {% for key_ps, value_ps in dict_three.items %} {% if key_ps == key3 %}
+                                <a style="color: black; font-size: 12px; padding-left: 12px; padding-top: 0" href="/balance?balans={{ key }}/{{ key2 }}/{{ key3 }}">{{ value_ps }}</a> {% endif %} {% endfor %}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/accounting" style="border: none; text-decoration: none">Учеты электроэнергии</a></li>
+            <li role="menuitem"><a href="/light" style="border: none; text-decoration: none">Уличное освещение</a></li>
+        </ul>
+    </div>
+<nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/menu" style="color: black">Главная страница</a></li>
+        <li class="breadcrumb-item"><a href="/accounting" style="color: black">Поиск</a></li>
+        <li class="breadcrumb-item"><a href="/device/?name={{return}}" style="color: black">Информация по ТУ</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Расход - Сутки</li>
+      </ol>
+    </nav>
+<div class="page-body">
+    <div class="date_choose ml-3 mb-3">
+        <label>Выберите месяц:</label>
+        <input class="form-control col-1 date_size" type="month" min="2020-01" id="bdaymonth" name="bdaymonth">
+    </div>
+    <div class="main_block">
+        <div class="archive_day ml-3 mr-5">
+            <h4>Показания архивные</h4>
+            <table class="table table-bordered table-striped" id="my_table" style="text-align: center">
+                <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th id="archive_month">Расход за сутки (потребление энергии), кВт*ч</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in data_by_date.items %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="info_block">
+            <h4>Информация о выбранном приборе учета электроэнергии</h4>
+            <table class="table-striped table col-2 table-bordered mb-4" style="text-align: center">
+                <tr>
+                    <th id="size_tr">Подстанция</th>
+                    <td>{{ ps }}</td>
+                </tr>
+                <tr>
+                    <th id="size_tr">Присоединение</th>
+                    <td>{{ vl }}</td>
+                </tr>
+                <tr>
+                    <th id="size_tr">Объект</th>
+                    <td>{{ ktp }}</td>
+                </tr>
+                <tr>
+                    <th id="size_tr">Наименование, модель счетчика</th>
+                    <td>{{ description.0 }}</td>
+                </tr>
+                <tr>
+                    <th id="kf_tr">Коэффициент трансформации по току, Ki</th>
+                    <td>{{ description.1 }}</td>
+                </tr>
+                <tr>
+                    <th id="size_tr">Зав.№ счетчика</th>
+                    <td>{{ description.2 }}</td>
+                </tr>
+            </table>
+            <div>
+                <h4>График за выбранный период:</h4>
+                <div id="chart_div" class="graphic"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="../../static/js/loader.js"></script>
+<script>
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var tableRows = [];
+      var results = document.getElementById('my_table');
+      Array.prototype.forEach.call(results.rows, function(row) {
+        var tableColumns = [];
+        Array.prototype.forEach.call(row.cells, function(cell) {
+          var cellText = cell.textContent || cell.innerText;
+          switch (cell.cellIndex) {
+            case 0:
+              tableColumns.push(cellText.trim());
+              break;
+
+            default:
+              switch (row.rowIndex) {
+                case 0:
+                  tableColumns.push(cellText.trim());
+                  break;
+
+                default:
+                  tableColumns.push(parseFloat(cellText));
+              }
+          }
+        });
+        tableRows.push(tableColumns);
+      });
+
+      var data = google.visualization.arrayToDataTable(tableRows);
+      var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data);
+}
+</script>
+</body>
+
+</html>

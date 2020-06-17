@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Уличное освещение</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/menu/base.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/check_version.js' %}"></script>
+    <script src="../static/js/table2excel.js" type="text/javascript"></script>
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<script type="text/javascript">
+    let searchParams = new URLSearchParams(window.location.search);
+
+    function async_get_data(_url) {
+      return new Promise((resolve, reject) => {
+        $.ajax({
+          type: 'GET',
+            url: _url,
+          success: function(data) {
+            resolve($.parseJSON(data));
+          },
+          error: function(error) {
+            reject(error)
+          },
+        });
+      });
+    }
+
+    afterSuccess = () => {
+        fes_change = (result) => {
+            let fes_elem = document.getElementById("fes").selectedOptions[0].value;
+            let res_select = document.getElementById("res");
+            let length = res_select.options.length;
+            res_select.innerHTML = "";
+            for (let i = length-1; i >= 0; i--) {
+                res_select.options[i] = null;
+            }
+            let res = Object.keys(result[`${fes_elem}`]);
+            for (let index_res in res) {
+                res_select.options[res_select.options.length] = new Option(res[index_res], index_res);
+            }
+            res_select.options.selectedIndex = 0;
+            res_change()
+        };
+
+        res_change = () => {
+            let fes_elem = document.getElementById("fes").selectedOptions[0].text;
+            let res_elem = document.getElementById("res").selectedOptions[0].text;
+            let ps_select = document.getElementById("ps");
+            let length = ps_select.options.length;
+            ps_select.innerHTML = "";
+            for (let i = length-1; i >= 0; i--) {
+                ps_select.options[i] = null;
+            }
+            let ps = Object.keys(result[fes_elem][res_elem]);
+            ps_select.options[ps_select.options.length] = new Option(ps[""], "");
+            for (let index_ps in ps) {
+                ps_select.options[ps_select.options.length] = new Option(ps[index_ps], index_ps);
+            }
+            ps_select.options.selectedIndex = 0;
+            ps_change()
+        };
+
+        ps_change = () => {
+            let fes_elem = document.getElementById("fes").selectedOptions[0].text;
+            let res_elem = document.getElementById("res").selectedOptions[0].text;
+            let ps_elem = document.getElementById("ps").selectedOptions[0].text;
+            let vl_select = document.getElementById("vl");
+            let length = vl_select.options.length;
+            vl_select.innerHTML = "";
+            for (let i = length-1; i >= 0; i--) {
+                vl_select.options[i] = null;
+            }
+            let vl = Object.keys(result[fes_elem][res_elem][ps_elem]);
+            vl_select.options[vl_select.options.length] = new Option(vl[""], "");
+            for (let index_vl in vl) {
+                vl_select.options[vl_select.options.length] = new Option(vl[index_vl], index_vl);
+            }
+            vl_select.options.selectedIndex = 0;
+            vl_change()
+        };
+
+        vl_change = () => {
+            let fes_elem = document.getElementById("fes").selectedOptions[0].text;
+            let res_elem = document.getElementById("res").selectedOptions[0].text;
+            let ps_elem = document.getElementById("ps").selectedOptions[0].text;
+            let vl_elem = document.getElementById("vl").selectedOptions[0].text;
+            let ktp_select = document.getElementById("ktp");
+            let length = ktp_select.options.length;
+            ktp_select.innerHTML = "";
+            for (let i = length-1; i >= 0; i--) {
+                ktp_select.options[i] = null;
+            }
+            let ktp = Object.keys(result[fes_elem][res_elem][ps_elem][vl_elem]);
+            ktp_select.options[ktp_select.options.length] = new Option(ktp[""], "");
+            for (let index_ktp in ktp) {
+                ktp_select.options[ktp_select.options.length] = new Option(ktp[index_ktp], index_ktp);
+            }
+            ktp_select.options.selectedIndex = 0;
+            ktp_change();
+        };
+
+        ktp_change = () => {
+            let fes_elem = document.getElementById("fes").selectedOptions[0].text;
+            let res_elem = document.getElementById("res").selectedOptions[0].text;
+            let ps_elem = document.getElementById("ps").selectedOptions[0].text;
+            let vl_elem = document.getElementById("vl").selectedOptions[0].text;
+            let ktp_elem = document.getElementById("ktp").selectedOptions[0].text;
+            let tu_select = document.getElementById("tu");
+            let length = tu_select.options.length;
+            tu_select.innerHTML = "";
+            for (let i = length-1; i >= 0; i--) {
+                tu_select.options[i] = null;
+            }
+            let tu = result[fes_elem][res_elem][ps_elem][vl_elem][ktp_elem];
+            tu_select.options[tu_select.options.length] = new Option(tu[""], "");
+            for (let index_tu in tu) {
+                tu_select.options[tu_select.options.length] = new Option(tu[index_tu], index_tu);
+            }
+            tu_select.options.selectedIndex = 0;
+        };
+
+        function doTheThing(_url) {
+            $.ajax({
+              type: 'GET',
+                url: _url,
+              success: function(data) {
+                var data_first = $.parseJSON(data);
+                $.ajax({
+                  type: 'GET',
+                    url: '/light/select_uo',
+                  success: function(data) {
+                    var data_second = $.parseJSON(data);
+                    let fes_select = document.getElementById("fes");
+                    let fes = Object.keys(data_second);
+                    for (let i = 0; i < fes.length; i++) {
+                        for(let elem_res in data_first) {
+                            if (fes[i] === elem_res) {
+                                fes_select.options[fes_select.options.length] = new Option(data_first[fes[i]], fes[i]);
+                            }
+                        }
+                    }
+                    fes_select.options.selectedIndex = 0;
+                    fes_change(data_second);
+                  },
+                  error: function(error) {
+                    return error;
+                  },
+                });
+              },
+              error: function(error) {
+                return error;
+              },
+            });
+        }
+        doTheThing('/light/get_fes');
+    };
+
+     initial_dates = () => {
+        let first_date = searchParams.get('date_one');
+        if (first_date === '' || first_date === null) {
+            const monthControl = document.getElementById('bdaymonth');
+            const date = new Date();
+            const month=("0" + (date.getMonth() + 1)).slice(-2);
+            const year=date.getFullYear();
+            monthControl.value = `${year}-${month}`;
+        } else {
+            const monthControl = document.getElementById('bdaymonth');
+            let split_result = first_date.split('-');
+            monthControl.value = `${split_result[0]}-${split_result[1]}`;
+            if (first_date === null || first_date === '') {
+               searchParams.set('date_one', `${split_result[0]}-${split_result[1]}`);
+            }
+            if (first_date !== null && first_date !== "") {
+                return;
+            }
+            window.location.search = searchParams;
+        }
+     };
+
+    formatDate = (date) => {
+        let d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    };
+    set_max_value = () => {
+        const date= new Date();
+        const month=("0" + (date.getMonth() + 1)).slice(-2);
+        const year=date.getFullYear();
+        document.getElementById("bdaymonth").max = `${year}-${month}`;
+    };
+    window.onload = () => {
+        let $preloader = $('#preloader'),
+            $svg_anm = $preloader.find('.svg_anm');
+        $svg_anm.fadeOut();
+        $preloader.delay(500).fadeOut('slow');
+        afterSuccess();
+        set_max_value();
+        initial_dates();
+        $(".date_size").change(function () {
+            let changed_start_date = document.getElementById("bdaymonth").value;
+            searchParams.delete('date_one');
+            searchParams.set('date_one', changed_start_date);
+            const monthControl = document.getElementById('bdaymonth');
+            window.location.search = searchParams;
+        });
+        $(function () {
+        $("#btnExport").click(function () {
+            $("#table_balance").table2excel({
+                filename: "Таблица.xls"
+            });
+        });
+    });
+    };
+</script>
+<script>
+        async function get_value_fes_async() {
+            let fes_dict = await async_get_data('/light/get_fes');
+            let result = await async_get_data('/light/select_uo');
+            console.log(fes_dict);
+            let fes_select = document.getElementById("fes");
+            let fes = Object.keys(result);
+            for (let i = 0; i < fes.length; i++) {
+                for(let elem_res in fes_dict) {
+                    if (fes[i] === elem_res) {
+                        fes_select.options[fes_select.options.length] = new Option(fes_dict[fes[i]], fes[i]);
+                    }
+                }
+            }
+            fes_select.options.selectedIndex = 0;
+            fes_change(result);
+        };
+</script>
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+    }
+
+    input::-webkit-clear-button {
+        display: none;
+    }
+</style>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: #dedede">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="justify-content: space-between">
+            <a class="navbar-brand" href="">Уличное освещение</a> {% if user.is_authenticated %}
+            <div>
+                <strong style="margin-right: 15px">Пользователь: {{ user.get_username }}</strong>
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+                {% else %}
+                <button class="btn btn-outline-secondary my-2 my-sm-0 ml-auto" id="a_hov" type="submit"><a href="/logout"><i class="fas fa-sign-out-alt"></i></a></button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="navbar" style="padding: 0; background: #f8f9fa">
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/menu" style="text-decoration: none; border: none">На главную</a></li>
+            {% for key,value in dict.items %}
+            <li role="menuitem">
+                {% for key_fes, value_fes in dict_two.items %} {% if key_fes == key %}
+                <a style="border: none; text-decoration: none; pointer-events: none;" href="/balance?balans={{ key }}">{{value_fes}}</a> {% endif %} {% endfor %}
+                <div class="mega-menu" aria-hidden="true" role="menu">
+                    {% for key2,value2 in value.items %}
+                    <div class="nav-column">
+                        <h6><a style="color: black; font-size: 13px" href="/res?res={{ key }}/{{ key2 }}">{{ key2 }}</a></h6> {% for key3, value3 in value2.items %}
+                        <ul>
+                            <li role="menuitem">
+                                {% for key_ps, value_ps in dict_three.items %} {% if key_ps == key3 %}
+                                <a style="color: black; font-size: 12px; padding-left: 12px; padding-top: 0" href="/balance?balans={{ key }}/{{ key2 }}/{{ key3 }}">{{ value_ps }}</a> {% endif %} {% endfor %}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="nav" role="menubar">
+            <li role="menuitem"><a href="/accounting" style="border: none; text-decoration: none">Учеты электроэнергии</a></li>
+            <li role="menuitem"><a href="/light" style="border: none; text-decoration: none">Уличное освещение</a></li>
+        </ul>
+    </div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/menu" style="color: black">Главная страница</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Уличное освещение</li>
+      </ol>
+    </nav>
+    <header id="header">
+        <div id="toolbar" class="grid-block">
+           <div class="mb-3 ml-2" style="display: flex; flex-direction: row" >
+                <div style="display: flex; flex-direction: column">
+                    <label>Выберите филиал: </label>
+                    <select class="custom-select custom-select-lg" id="fes" onchange="fes_change()" onclick="fes_change()"></select>
+                </div>
+                <div class="ml-2" style="display: flex; flex-direction: column">
+                    <label>Выберите РЭС: </label>
+                    <select class="custom-select custom-select-lg" id="res" onchange="res_change()" onclick="res_change()"></select>
+                </div>
+                <div style="display: flex; flex-direction: column" hidden>
+                    <label>Выберите подстанцию: </label>
+                    <select class="custom-select custom-select-lg" id="ps" onchange="ps_change()" onclick="ps_change()">
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column" hidden>
+                    <label>Выберите присоединение: </label>
+                    <select class="custom-select custom-select-lg" id="vl" onchange="vl_change()" onclick="vl_change()">
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column" hidden>
+                    <label>Выберите объект(ТП, МТП, КТП):: </label>
+                    <select class="custom-select custom-select-lg" id="ktp" onchange="ktp_change()" onclick="ktp_change()">
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+        <div class="mb-3 ml-3">
+            <h6 id="hidden_date" hidden>{{ hidden_date }}</h6>
+            <table class="table-bordered" style="width: 250px;" border="1">
+                <tbody>
+                    <tr>
+                        <td style="width: 150px">Исполком(сельсовет)</td>
+                        <td>
+                            <select class="custom-select" style="width: 200px"> //select_selsovet
+                                {% for result in select_data %}
+                                        <option value="{{ result }}">{{ result }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Расчетный период</td>
+                        <td><input class="form-control date_size" style="width: 200px" type="month" min="2020-02" id="bdaymonth" name="bdaymonth"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-responsive col-8 mb-3">
+            <table class="table-responsive table-bordered table-striped" id="table_balance">
+                <thead>
+                <tr>
+                    <th class="my_column" scope="col" colspan="6"></th>
+                    <th class="my_column" scope="col" colspan="3">Показания на 1-е число месяца, кВт*ч</th>
+                </tr>
+                <tr>
+                    <th scope="col" class="my_column">№ п/п</th>
+                    <th scope="col" class="my_column">Наименование объекта</th>
+                    <th scope="col" class="my_column">Адрес объекта</th>
+                    <th scope="col" class="my_column">Зав.№ счетчика</th>
+                    <th scope="col" class="my_column">Тип счетчика</th>
+                    <th scope="col" class="my_column">Коэфициент трансформации</th>
+                    <th scope="col" class="my_column">предыдущего</th>
+                    <th scope="col" class="my_column">текущего</th>
+                    <th scope="col" class="my_column">расход</th>
+                </tr>
+                </thead>
+                <tbody id="loss_calc_elem">
+                {% load mathfilters %}
+                {% for item in table_elements %}
+                    <tr class="big_row">
+                        <td class="my_row">{{ forloop.counter }}</td>
+                        <td class="my_row">{{ item.dtp }}</td>
+                        <td class="my_row">{{ item.locality }}</td>
+                        <td class="my_row">{{ item.head_of_counter }}</td>
+                        <td class="my_row">{{ item.driver }}</td>
+                        <td class="my_row" style="width: 90px">{{ item.ktt }}</td>
+                        <td class="my_row">{{ item.start_period|floatformat:3}}</td>
+                        <td class="my_row">{{ item.end_period|floatformat:3}}</td>
+                        <td class="my_row">
+                                {{ item.end_period|sub:item.start_period|mul:item.ktt|floatformat:3}}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                     <td class="my_column">Итого:</td>
+                    <td class="my_column">{{ sum_all|floatformat:3 }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="display: flex; flex-direction: column">
+        <button type="button" class="btn btn-secondary ml-3" style="width: 80px" id="btnExport">Печать</button>
+    </div>
+</body>
+</html>

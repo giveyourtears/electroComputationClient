@@ -1,0 +1,60 @@
+.device_header {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+
+}
+
+.row_device {
+    text-align: center;
+    margin: 0 !important;
+    padding: 2px !important;
+}
+
+.col_device {
+    margin: 0 !important;
+    padding: 5px !important;
+}
+
+p {
+    margin-bottom: 0 !important;
+}
+
+.info_dev {
+    font-size: 22px;
+    font-family: arial, helvetica, sans-serif;
+    color: green;
+    font-weight: bold
+}
+
+.bett_space {
+    display: flex;
+    justify-content: space-between;
+}
+
+.center_space {
+    display: flex;
+    justify-content: center;
+}
+
+.menu_button {
+    width: 55px;
+    height: 30px;
+    margin-right: 50px;
+}
+
+.return_button {
+    width: 55px;
+    height: 30px
+}
+
+.exit_button {
+    width: 55px;
+    height: 30px;
+}
+
+.jumbotron {
+    background: white !important;
+    padding: 1rem !important;
+    margin-bottom: 0 !important;
+}

@@ -1,0 +1,1 @@
+default_app_config = "find_device.apps.FindDeviceConfig"
